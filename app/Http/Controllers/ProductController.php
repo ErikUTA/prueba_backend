@@ -13,7 +13,7 @@ class ProductController extends Controller
     {
         $products = Product::get();
         $result = $this->getAllProductCategories($products);
-        return response()->json(['productos:' => $result], 200);
+        return response()->json(['productos' => $result], 200);
     } 
 
     public function getProductById(Request $request)
@@ -21,9 +21,9 @@ class ProductController extends Controller
         try {
             $product = Product::findOrFail($request->get('id'));
             $result = $this->getAllProductCategories([$product]);
-            return response()->json(['producto encontrado:' => $result], 200);
+            return response()->json(['producto' => $result], 200);
         } catch(\Exception $e) {
-            return response()->json(['No existe el producto'], 422);
+            return response()->json(['No existe el producto' => $request->get('id')], 422);
         }
     }
 
@@ -33,12 +33,12 @@ class ProductController extends Controller
             $product_info = $request->all();
             $product_found = Product::where('titulo', $product_info['titulo'])->first();
             if(!empty($product_found)) {
-                return response()->json(['El producto ya existe:' => $product_found], 422);
+                return response()->json(['Message' => 'El producto ya existe'], 422);
             }
             $response = Product::create($product_info);
             return response()->json(['Producto creado' => $response], 200);
         } catch(\Exception $e) {
-            return response()->json(['error al crear producto:' => $e->getMessage()], 422);
+            return response()->json(['Error al crear producto' => $e->getMessage()], 422);
         }
     }
 
@@ -49,7 +49,7 @@ class ProductController extends Controller
             $response = Product::findOrFail($product_info['id'])->update($product_info);
             return response()->json(['Producto actualizado' => $response], 200);
         } catch(\Exception $e) {
-            return response()->json(['error al actualizar el producto:' => $e->getMessage()], 422);
+            return response()->json(['Error al actualizar el producto' => $e->getMessage()], 422);
         }
     }
 
@@ -59,7 +59,7 @@ class ProductController extends Controller
             $response = Product::findOrFail($request->get('id'))->delete();
             return response()->json(['Producto eliminado' => $response], 200);
         } catch(\Exception $e) {
-            return response()->json(['error al eliminar el producto:' => $e->getMessage()], 422);
+            return response()->json(['Error al eliminar el producto' => $e->getMessage()], 422);
         }
     }
 
