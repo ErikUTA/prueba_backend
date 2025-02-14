@@ -16,30 +16,27 @@ class ProductSeeder extends Seeder
     {
         DB::table('products')->insert([
             'id' => 1,
-            'titulo' => 'Pantalla',
-            'precio' => '20000.5',
-            'descripcion' => 'Tv Samsung 55 Pulgadas 4K Ultra',
-            'fk_id_categoria' => '1',
+            'title' => 'Pantalla',
+            'price' => '20000.5',
+            'description' => 'Tv Samsung 55 Pulgadas 4K Ultra',
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now()
         ]);
 
         DB::table('products')->insert([
             'id' => 2,
-            'titulo' => 'Mochila',
-            'precio' => '474.35',
-            'descripcion' => 'Mochila deportiva',
-            'fk_id_categoria' => '2',
+            'title' => 'Mochila',
+            'price' => '474.35',
+            'description' => 'Mochila deportiva',
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now()
         ]);
 
         DB::table('products')->insert([
             'id' => 3,
-            'titulo' => 'Chamarra',
-            'precio' => '300.40',
-            'descripcion' => 'Color azul, talla CH',
-            'fk_id_categoria' => '3, 4',
+            'title' => 'Chamarra',
+            'price' => '300.40',
+            'description' => 'Color azul, talla CH',
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now()
         ]);

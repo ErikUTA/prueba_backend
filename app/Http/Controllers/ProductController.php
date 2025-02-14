@@ -5,38 +5,46 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Product;
 use App\Models\Category;
+use App\Models\ProductHasCategory;
 use App\Services\PayUService\Exception;
 
 class ProductController extends Controller
 {
     public function getProducts()
     {
-        $products = Product::get();
-        $result = $this->getAllProductCategories($products);
-        return response()->json(['productos' => $result], 200);
+        try {
+            $products = Product::with('categories')->get();
+            return response()->json($products, 200);
+        } catch(\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 422);
+        }
     } 
 
     public function getProductById(Request $request)
     {
         try {
-            $product = Product::findOrFail($request->get('id'));
-            $result = $this->getAllProductCategories([$product]);
-            return response()->json(['producto' => $result], 200);
+            $product = Product::with('categories')->whereId($request->get('id'))->first();       
+            if(empty($product)) {
+                return response()->json(['message' => 'No existe el producto'], 422);
+            }   
+            return response()->json($product, 200);
         } catch(\Exception $e) {
-            return response()->json(['No existe el producto' => $request->get('id')], 422);
+            return response()->json(['message' => $e->getMessage()], 422);
         }
     }
 
     public function createProduct(Request $request) 
     {
         try {
-            $product_info = $request->all();
-            $product_found = Product::where('titulo', $product_info['titulo'])->first();
-            if(!empty($product_found)) {
-                return response()->json(['Message' => 'El producto ya existe'], 422);
-            }
-            $response = Product::create($product_info);
-            return response()->json(['Producto creado' => $response], 200);
+            $data = $request->all();
+            $categoryIds = explode(',', $request->get('categories'));
+            $product = Product::create($data);
+            $product->categories()->attach($categoryIds);
+            
+            return response()->json([
+                'message' => 'Producto creado correctamente',
+                'product' => $product
+            ], 200);
         } catch(\Exception $e) {
             return response()->json(['Error al crear producto' => $e->getMessage()], 422);
         }
@@ -45,9 +53,15 @@ class ProductController extends Controller
     public function updateProduct(Request $request)
     {
         try {
-            $product_info = $request->all();
-            $response = Product::findOrFail($product_info['id'])->update($product_info);
-            return response()->json(['Producto actualizado' => $response], 200);
+            $data = $request->all();
+            $product = Product::findOrFail($data['id']);
+            $categoryIds = explode(',', $data['categories']);
+            
+            $product->categories()->detach();
+            $product->categories()->attach($categoryIds);
+            $product->update($data);
+            
+            return response()->json(['Producto actualizado correctamente' => $product], 200);
         } catch(\Exception $e) {
             return response()->json(['Error al actualizar el producto' => $e->getMessage()], 422);
         }
@@ -56,30 +70,14 @@ class ProductController extends Controller
     public function deleteProduct(Request $request)
     {
         try {
-            $response = Product::findOrFail($request->get('id'))->delete();
-            return response()->json(['Producto eliminado' => $response], 200);
+            $product = Product::findOrFail($request->get('id'));
+            $product->categories()->detach();
+            $product->delete($product->id);
+            return response()->json([
+                'message' => 'Producto eliminado correctamente'
+            ], 200);
         } catch(\Exception $e) {
             return response()->json(['Error al eliminar el producto' => $e->getMessage()], 422);
         }
-    }
-
-    public function getAllProductCategories($products)
-    { 
-        $products_with_categories = [];
-        foreach($products as $product) {
-            $found_categories = Category::whereIn('id',  explode(',', $product['fk_id_categoria']))->get();
-            if(!empty($found_categories)) {
-                array_push($products_with_categories, [
-                    'id' => $product['id'],
-                    'titulo' => $product['titulo'],
-                    'precio' => $product['precio'],
-                    'descripcion' => $product['descripcion'],
-                    'categorias' => $found_categories,
-                    'created_at' => $product['created_at'],
-                    'updated_at' => $product['updated_at'],
-                ]);
-            }
-        }
-        return $products_with_categories;
     }
 }

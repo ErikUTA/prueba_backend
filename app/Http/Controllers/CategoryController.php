@@ -9,7 +9,11 @@ class CategoryController extends Controller
 {
     public function getCategories()
     {
-        $result = Category::get();
-        return response()->json(['categorias' => $result], 200);
+        try {
+            $categories = Category::get();
+            return response()->json($categories, 200);
+        } catch(\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 422);
+        }
     } 
 }
