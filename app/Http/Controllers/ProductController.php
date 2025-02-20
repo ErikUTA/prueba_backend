@@ -14,56 +14,80 @@ class ProductController extends Controller
     {
         try {
             $products = Product::with('categories')->get();
-            return response()->json($products, 200);
+            $categories = Category::get();
+            return response()->json([
+                'products' => $products,
+                'categories' => $categories
+            ], 200);
         } catch(\Exception $e) {
-            return response()->json(['message' => $e->getMessage()], 422);
+            return response()->json(['message' => $e->getMessage()], 500);
         }
-    } 
+    }
 
     public function getProductById(Request $request)
     {
         try {
             $product = Product::with('categories')->whereId($request->get('id'))->first();       
             if(empty($product)) {
-                return response()->json(['message' => 'No existe el producto'], 422);
+                return response()->json(['message' => 'No existe el producto'], 500);
             }   
             return response()->json($product, 200);
         } catch(\Exception $e) {
-            return response()->json(['message' => $e->getMessage()], 422);
+            return response()->json(['message' => $e->getMessage()], 500);
         }
     }
 
     public function createProduct(Request $request) 
     {
         try {
-            $data = $request->all();
-            $categoryIds = explode(',', $request->get('categories'));
-            $product = Product::create($data);
-            $product->categories()->attach($categoryIds);
+            \DB::beginTransaction();
+            $input = $request->all();
+            $product = Product::create($input);
+            if(!empty($input['categories'])) {
+                $product->categories()->attach($input['categories']);
+            }
             
+            \DB::commit();
             return response()->json([
+                'success' => true,
                 'message' => 'Producto creado correctamente',
                 'product' => $product
             ], 200);
         } catch(\Exception $e) {
-            return response()->json(['Error al crear producto' => $e->getMessage()], 422);
+            \DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+                'line' => $e->getLine()
+            ], 500);          
         }
     }
 
     public function updateProduct(Request $request)
     {
         try {
-            $data = $request->all();
-            $product = Product::findOrFail($data['id']);
-            $categoryIds = explode(',', $data['categories']);
-            
+            \DB::beginTransaction();
+            $input = $request->all();
+            $product = Product::findOrFail($input['id']);
             $product->categories()->detach();
-            $product->categories()->attach($categoryIds);
-            $product->update($data);
+            if(!empty($input['categories'])) {
+                $product->categories()->attach($input['categories']);
+            }
+            $product->update($input);
             
-            return response()->json(['Producto actualizado correctamente' => $product], 200);
+            \DB::commit();
+            return response()->json([
+                'success' => true,
+                'message' => 'Producto actualizado correctamente',
+                'product' => $product
+            ], 200);
         } catch(\Exception $e) {
-            return response()->json(['Error al actualizar el producto' => $e->getMessage()], 422);
+            \DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+                'line' => $e->getLine()
+            ], 500);        
         }
     }
 
@@ -74,10 +98,15 @@ class ProductController extends Controller
             $product->categories()->detach();
             $product->delete($product->id);
             return response()->json([
+                'success' => true,
                 'message' => 'Producto eliminado correctamente'
             ], 200);
         } catch(\Exception $e) {
-            return response()->json(['Error al eliminar el producto' => $e->getMessage()], 422);
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+                'line' => $e->getLine()
+            ], 500);
         }
     }
 }
