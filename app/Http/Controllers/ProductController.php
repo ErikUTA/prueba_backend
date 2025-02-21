@@ -24,10 +24,10 @@ class ProductController extends Controller
         }
     }
 
-    public function getProductById(Request $request)
+    public function getProductById(Request $request, $productId)
     {
         try {
-            $product = Product::with('categories')->whereId($request->get('id'))->first();       
+            $product = Product::with('categories')->whereId($productId)->first();       
             if(empty($product)) {
                 return response()->json(['message' => 'No existe el producto'], 500);
             }   
@@ -43,6 +43,8 @@ class ProductController extends Controller
             \DB::beginTransaction();
             $input = $request->all();
             $product = Product::create($input);
+            $product->fill($request->all());
+
             if(!empty($input['categories'])) {
                 $product->categories()->attach($input['categories']);
             }
@@ -63,13 +65,15 @@ class ProductController extends Controller
         }
     }
 
-    public function updateProduct(Request $request)
+    public function updateProduct(Request $request, $productId)
     {
+        \DB::beginTransaction();
         try {
-            \DB::beginTransaction();
             $input = $request->all();
-            $product = Product::findOrFail($input['id']);
+            $product = Product::findOrFail($productId);
+            $product->fill($request->all());
             $product->categories()->detach();
+
             if(!empty($input['categories'])) {
                 $product->categories()->attach($input['categories']);
             }
@@ -91,17 +95,21 @@ class ProductController extends Controller
         }
     }
 
-    public function deleteProduct(Request $request)
+    public function deleteProduct(Request $request, $productId)
     {
+        \DB::beginTransaction();
         try {
-            $product = Product::findOrFail($request->get('id'));
+            $product = Product::findOrFail($productId);
             $product->categories()->detach();
             $product->delete($product->id);
+
+            \DB::commit();
             return response()->json([
                 'success' => true,
                 'message' => 'Producto eliminado correctamente'
             ], 200);
         } catch(\Exception $e) {
+            \DB::rollBack();
             return response()->json([
                 'success' => false,
                 'message' => $e->getMessage(),

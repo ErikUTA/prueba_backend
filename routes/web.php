@@ -4,19 +4,19 @@ use Illuminate\Support\Facades\Route;
 use \App\Http\Controllers\ProductController;
 use \App\Http\Controllers\CategoryController;
 
-Route::namespace('Web')->group(function() {
-    Route::get('/products', [ProductController::class, 'getProducts'])
-        ->name('web.products');
+Route::prefix('products')->name('products.')->group(function() {
+    Route::get('/', [ProductController::class, 'getProducts'])
+        ->name('products');
     
-    Route::get('/get-product', [ProductController::class, 'getProductById'])
-        ->name('web.get-product');
+    Route::get('/{productId}', [ProductController::class, 'getProductById'])
+        ->name('get_product');
     
     Route::post('/create-product', [ProductController::class, 'createProduct'])
-        ->name('web.create-product');
+        ->name('create_product');
     
-    Route::put('/update-product', [ProductController::class, 'updateProduct'])
-        ->name('web.update-product');
+    Route::put('/update-product/{productId}', [ProductController::class, 'updateProduct'])
+        ->name('update_product');
     
-    Route::delete('/delete-product', [ProductController::class, 'deleteProduct'])
-        ->name('web.delete-product');
+    Route::delete('/delete-product/{productId}', [ProductController::class, 'deleteProduct'])
+        ->name('delete_product');
 });
