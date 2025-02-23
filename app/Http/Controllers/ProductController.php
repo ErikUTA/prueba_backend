@@ -39,8 +39,8 @@ class ProductController extends Controller
 
     public function createProduct(Request $request) 
     {
+        \DB::beginTransaction();
         try {
-            \DB::beginTransaction();
             $input = $request->all();
             $product = Product::create($input);
             $product->fill($request->all());
@@ -73,9 +73,14 @@ class ProductController extends Controller
             $product = Product::findOrFail($productId);
             $product->fill($request->all());
             $product->categories()->detach();
-
-            if(!empty($input['categories'])) {
-                $product->categories()->attach($input['categories']);
+            $categories = $input['categories'];
+            
+            if(!empty($categories)) {
+                $categoryIds = [];
+                foreach($categories as $category) {
+                    array_push($categoryIds, $category['id']);
+                }
+                $product->categories()->sync($categoryIds);
             }
             $product->update($input);
             
