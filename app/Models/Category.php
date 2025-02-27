@@ -15,7 +15,7 @@ class Category extends Model
 
     public function products()
 	{
-		return $this->belongsToMany(Product::class, 'product_has_category')
+		return $this->belongsToMany(Product::class, 'category_product')
             ->withPivot('category_id', 'status');
 	}
 }
