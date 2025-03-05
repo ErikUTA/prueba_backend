@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
@@ -16,7 +17,7 @@ class AuthController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8|confirmed',
+            'password' => 'required|string|min:8',
         ]);
 
         if ($validator->fails()) {
@@ -32,27 +33,50 @@ class AuthController extends Controller
         return response()->json(['message' => 'Usuario creado correctamente']);
     }
 
-    // Login de usuario y generar token
     public function login(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'email' => 'required|email',
-            'password' => 'required|string',
-        ]);
+        $credentials = $request->only('email', 'password');
+        if (Auth::attempt($credentials)) {
+            $user = Auth::user();
+            $token = $user->createToken('authToken')->plainTextToken;
 
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
+            return response()->json([
+                'message' => 'Login successful',
+                'token' => $token,
+            ])->withCookie(cookie('token', $token, 60, '/', null, true, true, false, 'None'));
         }
 
-        $user = User::where('email', $request->email)->first();
+        return response()->json(['error' => 'Unauthorized'], 401);
+    }
 
-        if (!$user || !Hash::check($request->password, $user->password)) {
-            return response()->json(['message' => 'Credenciales incorrectas'], 401);
-        }
+    public function logout(Request $request)
+    {
+        Auth::logout();
+        return response()->json(['message' => 'Logged out successfully']);
+    }
 
-        // Generar el token
-        $token = $user->createToken('AppName')->plainTextToken;
-
-        return response()->json(['token' => $token]);
+    public function user()
+    {
+        return response()->json(Auth::user());
     }
 }
+
+// $validator = Validator::make($request->all(), [
+//     'email' => 'required|email',
+//     'password' => 'required|string',
+// ]);
+
+// if ($validator->fails()) {
+//     return response()->json(['errors' => $validator->errors()], 422);
+// }
+
+// $user = User::where('email', $request->email)->first();
+
+// if (!$user || !Hash::check($request->password, $user->password)) {
+//     return response()->json(['message' => 'Credenciales incorrectas'], 401);
+// }
+
+// // Generar el token
+// $token = $user->createToken('AppName')->plainTextToken;
+
+// return response()->json(['token' => $token]);
