@@ -36,17 +36,12 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         $credentials = $request->only('email', 'password');
-        if (Auth::attempt($credentials)) {
-            $user = Auth::user();
-            $token = $user->createToken('authToken')->plainTextToken;
 
-            return response()->json([
-                'message' => 'Login successful',
-                'token' => $token,
-            ])->withCookie(cookie('token', $token, 60, '/', null, true, true, false, 'None'));
+        if (Auth::attempt($credentials)) {
+            return response()->json(['message' => 'Login successful']);
         }
 
-        return response()->json(['error' => 'Unauthorized'], 401);
+        return response()->json(['message' => 'Invalid credentials'], 401);
     }
 
     public function logout(Request $request)
@@ -60,23 +55,3 @@ class AuthController extends Controller
         return response()->json(Auth::user());
     }
 }
-
-// $validator = Validator::make($request->all(), [
-//     'email' => 'required|email',
-//     'password' => 'required|string',
-// ]);
-
-// if ($validator->fails()) {
-//     return response()->json(['errors' => $validator->errors()], 422);
-// }
-
-// $user = User::where('email', $request->email)->first();
-
-// if (!$user || !Hash::check($request->password, $user->password)) {
-//     return response()->json(['message' => 'Credenciales incorrectas'], 401);
-// }
-
-// // Generar el token
-// $token = $user->createToken('AppName')->plainTextToken;
-
-// return response()->json(['token' => $token]);
