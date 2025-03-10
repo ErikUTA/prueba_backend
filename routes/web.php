@@ -15,8 +15,8 @@ Route::middleware('auth:sanctum')->get('user', function () {
     return Auth::user();
 });
 
-Route::middleware('auth:sanctum', 'checkrole:user')->group(function () {
-    Route::prefix('products')->name('products.')->group(function() {
+Route::middleware('auth:sanctum')->group(function () {
+    Route::prefix('products')->name('products.')->middleware('role:user')->group(function() {
         Route::get('/', [ProductController::class, 'getProducts'])
             ->name('products');
         

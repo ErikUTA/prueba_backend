@@ -16,7 +16,6 @@ class CheckRole
     public function handle(Request $request, Closure $next, ...$roles): Response
     {
         $user = auth()->user();
-        dd('Middleware CheckRole ejecutado', $user->role, $roles);
 
         if (!in_array($user->role, $roles)) {
             return response()->json(['message' => 'Forbidden'], 403);
