@@ -31,9 +31,15 @@ return new class extends Migration
             $table->id();
             $table->string('name')->unique();
             $table->string('description');
-            $table->foreignId('status')->constrained('status', 'id');
+            $table->foreignId('status')->default(9)->constrained('status', 'id');
             $table->foreignId('user_id')->constrained('users', 'id')->onDelete('cascade');
             $table->timestamps();
+        });
+
+        Schema::create('cache', function (Blueprint $table) {
+            $table->string('key')->primary();
+            $table->mediumText('value');
+            $table->integer('expiration');
         });
 
         Schema::create('tasks', function (Blueprint $table) {
