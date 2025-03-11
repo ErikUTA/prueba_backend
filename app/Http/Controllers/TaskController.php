@@ -11,6 +11,12 @@ class TaskController extends Controller
     public function getTasks()
     {
         try {
+            if(auth()->user()->role === 'RH') {
+                return response()->json([
+                    'success' => false,
+                    'Role no permitido'
+                ])
+            }
             $tasks = Task::get();
             return response()->json([
                 'success' => true,
@@ -34,8 +40,12 @@ class TaskController extends Controller
                 'status' => 'required|string'
                 'project_id' => 'required|exists:projects,id'
             ]);
+            $users = $request->users;
 
             $task = Task::create($validator);
+            if(!empty($users)) {
+                $task = $task->users()->attach($users);
+            }
 
             \DB::commit();
             return response()->json([
@@ -62,6 +72,13 @@ class TaskController extends Controller
                 'status' => 'required|string'
                 'project_id' => 'required|exists:projects,id'
             ]);
+            if(auth()->user()->role === 'RH') {
+                $validator = $request->validate([
+                    'title' => 'required|string|max:255'
+                    'description' => 'required'
+                    'project_id' => 'required|exists:projects,id'
+                ]);
+            }
             
             $task->saveOrFail();
 

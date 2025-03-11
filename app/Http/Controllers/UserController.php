@@ -27,11 +27,24 @@ class UserController extends Controller
     {
         \DB::beginTransaction();
         try {
-            $input = $request->all();
+            $validator = $request->validate([
+                'name' => 'required|string|max:255',
+                'last_name' => 'required|string|max:255',
+                'password' => 'required|string|min:8',
+                'role' => 'required|string',
+            ]);
+            if(auth()->user()->role === 'RH') {
+                $validator = $request->validate([
+                    'name' => 'required|string|max:255',
+                    'last_name' => 'required|string|max:255',
+                    'email' => 'required|string|email|max:255|unique:users',
+                    'password' => 'required|string|min:8',
+                    'role' => 'required|string',
+                ]);
+            }
             $user = User::findOrFail($userId);
             $user->fill($request->all());
-
-            $user->update($input);
+            $user->update($validator);
             
             \DB::commit();
             return response()->json([
@@ -130,7 +143,7 @@ class UserController extends Controller
             $user = User::find($userId);
             $tasks = $request->tasks;
             
-            if(!$user) {|
+            if(!$user) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Proyecto no encontrado'

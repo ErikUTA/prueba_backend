@@ -11,6 +11,12 @@ class ProjectController extends Controller
     public function getProjects()
     {
         try {
+            if(auth()->user()->role === 'RH') {
+                return response()->json([
+                    'success' => false,
+                    'Role no permitido'
+                ])
+            }
             $projects = Project::get();
             return response()->json([
                 'success' => true,

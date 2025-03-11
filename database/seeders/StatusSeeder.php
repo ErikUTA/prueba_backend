@@ -41,5 +41,40 @@ class StatusSeeder extends Seeder
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now()
         ]);
+
+        DB::table('status')->insert([
+            'id' => 5,
+            'name' => 'En proceso',
+            'created_at' => Carbon::now(),
+            'updated_at' => Carbon::now()
+        ]);
+
+        DB::table('status')->insert([
+            'id' => 6,
+            'name' => 'Finalizada',
+            'created_at' => Carbon::now(),
+            'updated_at' => Carbon::now()
+        ]);
+
+        DB::table('status')->insert([
+            'id' => 7,
+            'name' => 'En pruebas',
+            'created_at' => Carbon::now(),
+            'updated_at' => Carbon::now()
+        ]);
+
+        DB::table('status')->insert([
+            'id' => 8,
+            'name' => 'Bug',
+            'created_at' => Carbon::now(),
+            'updated_at' => Carbon::now()
+        ]);
+
+        DB::table('status')->insert([
+            'id' => 9,
+            'name' => 'En espera de asignacion',
+            'created_at' => Carbon::now(),
+            'updated_at' => Carbon::now()
+        ]);
     }
 }
