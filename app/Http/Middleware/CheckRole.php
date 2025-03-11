@@ -18,7 +18,7 @@ class CheckRole
         $user = auth()->user();
 
         if (!in_array($user->role, $roles)) {
-            return response()->json(['message' => 'Forbidden'], 403);
+            return response()->json(['message' => 'Ruta restringida para este rol'], 403);
         }
         return $next($request);
     }

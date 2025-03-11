@@ -11,16 +11,15 @@ class Task extends Model
     protected $table = 'tasks';
 
     protected $fillable = [
-        'name',
         'title',
         'description',
         'status',
+        'project_id'
     ];
 
     public function users()
 	{
-		return $this->belongsToMany(User::class, 'task_user')
-            ->withPivot('task_id', 'id');
+		return $this->belongsToMany(User::class);
 	}
 
     public function project()

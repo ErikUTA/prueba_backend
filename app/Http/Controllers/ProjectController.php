@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Project;
+use App\Models\Task;
 use App\Services\PayUService\Exception;
 
 class ProjectController extends Controller
@@ -11,13 +12,7 @@ class ProjectController extends Controller
     public function getProjects()
     {
         try {
-            if(auth()->user()->role === 'RH') {
-                return response()->json([
-                    'success' => false,
-                    'Role no permitido'
-                ])
-            }
-            $projects = Project::get();
+            $projects = Project::with(['tasks.users', 'users'])->get();
             return response()->json([
                 'success' => true,
                 'projects' => $projects,
@@ -35,9 +30,9 @@ class ProjectController extends Controller
         \DB::beginTransaction();
         try {
             $validator = $request->validate([
-                'name' => 'required|string|max:255'
-                'description' => 'required'
-                'status' => 'required|string'
+                'name' => 'required|string|max:255',
+                'description' => 'required',
+                'status' => 'required|exists:status,id',
                 'user_id' => 'required|exists:users,id'
             ]);
             $project = Project::create($validator);
@@ -61,14 +56,20 @@ class ProjectController extends Controller
         \DB::beginTransaction();
         try {
             $project = Project::find($projectId);
+            if(!$project) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Proyecto no encontrado'
+                ], 500);
+            }
             $validator = $request->validate([
-                'name' => 'required|string|max:255'
-                'description' => 'required'
-                'status' => 'required|string'
+                'name' => 'required|string|max:255',
+                'description' => 'required',
+                'status' => 'required|exists:status,id',
                 'user_id' => 'required|exists:users,id'
             ]);
             
-            $project->saveOrFail();
+            $project->update($validator);
 
             \DB::commit();
             return response()->json([
@@ -93,7 +94,7 @@ class ProjectController extends Controller
                 return response()->json([
                     'success' => false,
                     'message' => 'Proyecto no encontrado'
-                ]);
+                ], 500);
             }
             $project->delete();
 
@@ -121,7 +122,7 @@ class ProjectController extends Controller
                 return response()->json([
                     'success' => false,
                     'message' => 'Proyecto no encontrado'
-                ]);
+                ], 500);
             }
             $project->users()->sync($users);
 

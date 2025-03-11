@@ -5,13 +5,16 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Services\PayUService\Exception;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller
 {
     public function getUsers()
     {
         try {
-            $users = User::get();
+            $users = User::with('tasks')->get();
             return response()->json([
                 'users' => $users,
             ], 200);
@@ -27,6 +30,13 @@ class UserController extends Controller
     {
         \DB::beginTransaction();
         try {
+            $user = User::find($userId);
+            if(!$user) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Usuario no encontrado'
+                ], 500);
+            }
             $validator = $request->validate([
                 'name' => 'required|string|max:255',
                 'last_name' => 'required|string|max:255',
@@ -42,7 +52,6 @@ class UserController extends Controller
                     'role' => 'required|string',
                 ]);
             }
-            $user = User::findOrFail($userId);
             $user->fill($request->all());
             $user->update($validator);
             
@@ -64,13 +73,19 @@ class UserController extends Controller
     public function updatePassword(Request $request, $userId) {
         \DB::beginTransaction();
         try {
-            $user = User::findOrNew($userId);
-
-            if ($request->has('password') && !empty($request['password'])) {
-                $request['password'] = bcrypt($request['password']);
-            }            
-            $user->fill($request->all());
-            $user->saveOrFail();
+            $user = User::find($userId);
+            if(!$user) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Usuario no encontrado'
+                ], 500);
+            }
+            $request->validate([
+                'password' => 'required|string|min:8',
+            ]);  
+            $user->update([
+                'password' => Hash::make($request['password'])
+            ]);      
 
             \DB::commit();
             return response()->json([
@@ -91,11 +106,21 @@ class UserController extends Controller
     {
         \DB::beginTransaction();
         try {
-            $user = User::whereId(userId);
-            $user->role = $request['role'];
-            $user->saveOrFail();
-            \DB::commit();
+            $user = User::whereId($userId);
+            if(!$user) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Usuario no encontrado'
+                ], 500);
+            }
+            $request->validate([
+                'role' => 'required|string',
+            ]);
+            $user->update([
+                'role' => $request['role']
+            ]); 
 
+            \DB::commit();
             return response()->json([
                 'success' => true,
                 'message' => 'Role actualizado correctamente',
@@ -118,7 +143,7 @@ class UserController extends Controller
                 return response()->json([
                     'success' => false,
                     'message' => 'Usuario no encontrado'
-                ]);
+                ], 500);
             }
             $user->delete();
 
@@ -146,8 +171,8 @@ class UserController extends Controller
             if(!$user) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Proyecto no encontrado'
-                ]);
+                    'message' => 'Usuario no encontrado'
+                ], 500);
             }
             $user->tasks()->sync($tasks);
 
@@ -163,5 +188,63 @@ class UserController extends Controller
                 'message' => $e->getMessage()
             ], 500);
         }
+    }
+
+    public function register(Request $request)
+    {
+        \DB::beginTransaction();
+        try {
+            $validator = $request->validate([
+                'name' => 'required|string|max:255',
+                'last_name' => 'required|string|max:255',
+                'email' => 'required|string|email|max:255|unique:users',
+                'password' => 'required|string|min:8',
+                'role' => 'required|string',
+            ]);
+    
+            $user = User::create([
+                'name' => $request->name,
+                'last_name' => $request->last_name,
+                'email' => $request->email,
+                'password' => Hash::make($request->password),
+                'role' => $request->role
+            ]);
+    
+            \DB::commit();
+            return response()->json([
+                'success' => true,
+                'message' => 'Usuario creado correctamente'
+            ]);
+        } catch(\Exception $e) {
+            \DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+                'line' => $e->getLine()
+            ], 500);        
+        }
+        
+    }
+
+    public function login(Request $request)
+    {
+        $credentials = $request->only('email', 'password');
+
+        if (Auth::attempt($credentials)) {
+            return response()->json(['message' => 'Login completado']);
+        }
+
+        return response()->json(['message' => 'Credenciales incorrectas'], 401);
+    }
+
+    public function logout(Request $request)
+    {
+        Auth::logout();
+        return response()->json(['message' => 'Logout completado']);
+    }
+
+    public function user()
+    {
+        return response()->json(Auth::user());
     }
 }

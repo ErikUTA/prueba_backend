@@ -11,12 +11,6 @@ class TaskController extends Controller
     public function getTasks()
     {
         try {
-            if(auth()->user()->role === 'RH') {
-                return response()->json([
-                    'success' => false,
-                    'Role no permitido'
-                ])
-            }
             $tasks = Task::get();
             return response()->json([
                 'success' => true,
@@ -35,9 +29,9 @@ class TaskController extends Controller
         \DB::beginTransaction();
         try {
             $validator = $request->validate([
-                'title' => 'required|string|max:255'
-                'description' => 'required'
-                'status' => 'required|string'
+                'title' => 'required|string|max:255',
+                'description' => 'required',
+                'status' => 'required|exists:status,id',
                 'project_id' => 'required|exists:projects,id'
             ]);
             $users = $request->users;
@@ -66,26 +60,66 @@ class TaskController extends Controller
         \DB::beginTransaction();
         try {
             $task = Task::find($taskId);
+            if(!$task) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Tarea no encontrada'
+                ], 500);
+            }
             $validator = $request->validate([
-                'title' => 'required|string|max:255'
-                'description' => 'required'
-                'status' => 'required|string'
+                'title' => 'required|string|max:255',
+                'description' => 'required',
+                'status' => 'required|exists:status,id',
                 'project_id' => 'required|exists:projects,id'
             ]);
             if(auth()->user()->role === 'RH') {
                 $validator = $request->validate([
-                    'title' => 'required|string|max:255'
-                    'description' => 'required'
+                    'title' => 'required|string|max:255',
+                    'description' => 'required',
                     'project_id' => 'required|exists:projects,id'
                 ]);
             }
+            $users = $request->users;
+            if(!empty($users)) {
+                $task->users()->sync($users);
+            }
             
-            $task->saveOrFail();
+            $task->update($validator);
 
             \DB::commit();
             return response()->json([
                 'success' => true,
                 'message' => 'Tarea actualizada correctamente',
+            ], 200);
+        } catch(\Exception $e) {
+            \DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function updateStatus(Request $request, $taskId)
+    {
+        \DB::beginTransaction();
+        try {
+            $task = Task::find($taskId);
+            if(!$task) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Tarea no encontrada'
+                ], 500);
+            }
+            $validator = $request->validate([
+                'status' => 'required|exists:status,id',
+            ]);
+            $task->update($validator);
+
+            \DB::commit();
+            return response()->json([
+                'success' => true,
+                'message' => 'Estado de la tarea actualizado correctamente',
             ], 200);
         } catch(\Exception $e) {
             \DB::rollBack();
@@ -105,7 +139,7 @@ class TaskController extends Controller
                 return response()->json([
                     'success' => false,
                     'message' => 'Tarea no encontrada'
-                ]);
+                ], 500);
             }
             $task->delete();
 

@@ -52,13 +52,11 @@ class User extends Authenticatable
 
     public function tasks()
 	{
-		return $this->belongsToMany(Task::class, 'task_user')
-            ->withPivot('user_id', 'id');
+		return $this->belongsToMany(Task::class);
 	}
 
     public function projects()
     {
-        return $this->belongsToMany(User::class, 'project_user')
-            ->withPivot('user_id', 'id');
+        return $this->belongsToMany(User::class);
     }
 }

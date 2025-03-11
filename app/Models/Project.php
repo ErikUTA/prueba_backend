@@ -14,11 +14,16 @@ class Project extends Model
         'name',
         'description',
         'status',
+        'user_id'
     ];
 
     public function users()
 	{
-		return $this->belongsToMany(User::class, 'project_user')
-            ->withPivot('proyect_id', 'id');
+		return $this->belongsToMany(User::class);
 	}
+
+    public function tasks()
+    {
+        return $this->hasMany(Task::class);
+    }
 }
