@@ -40,7 +40,7 @@ return new class extends Migration
             $table->id();
             $table->string('title')->unique();
             $table->string('description');
-            $table->foreignId('status')->constrained('status', 'id');
+            $table->foreignId('status')->default(9)->constrained('status', 'id');
             $table->foreignId('project_id')->constrained('projects', 'id')->onDelete('cascade');
             $table->timestamps();
         });
