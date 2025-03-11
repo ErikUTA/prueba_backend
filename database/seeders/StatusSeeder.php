@@ -2,49 +2,42 @@
 
 namespace Database\Seeders;
 
-use Carbon\Carbon;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
-class CategorySeeder extends Seeder
+class StatusSeeder extends Seeder
 {
     /**
      * Run the database seeds.
      */
     public function run(): void
     {
-        DB::table('categories')->insert([
+        DB::table('status')->insert([
             'id' => 1,
-            'name' => 'Pantallas',
+            'name' => 'Desarrollo',
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now()
         ]);
 
-        DB::table('categories')->insert([
+        DB::table('status')->insert([
             'id' => 2,
-            'name' => 'Materiales escolares',
+            'name' => 'Finalizado',
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now()
         ]);
 
-        DB::table('categories')->insert([
+        DB::table('status')->insert([
             'id' => 3,
-            'name' => 'Ropa',
+            'name' => 'Cancelado',
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now()
         ]);
 
-        DB::table('categories')->insert([
+        DB::table('status')->insert([
             'id' => 4,
-            'name' => 'Calzado',
-            'created_at' => Carbon::now(),
-            'updated_at' => Carbon::now()
-        ]);
-
-        DB::table('categories')->insert([
-            'id' => 5,
-            'name' => 'Comida',
+            'name' => 'Pausa',
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now()
         ]);

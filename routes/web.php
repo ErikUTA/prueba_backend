@@ -1,9 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use \App\Http\Controllers\ProductController;
-use \App\Http\Controllers\CategoryController;
-use \App\Http\Controllers\AuthController;
+use \App\Http\Controllers\RH\RHController;
 use Illuminate\Support\Facades\Auth;
 
 
@@ -16,20 +14,23 @@ Route::middleware('auth:sanctum')->get('user', function () {
 });
 
 Route::middleware('auth:sanctum')->group(function () {
-    Route::prefix('products')->name('products.')->middleware('role:user')->group(function() {
-        Route::get('/', [ProductController::class, 'getProducts'])
-            ->name('products');
-        
-        Route::get('/{productId}', [ProductController::class, 'getProductById'])
-            ->name('get_product');
-        
-        Route::post('/create-product', [ProductController::class, 'createProduct'])
-            ->name('create_product');
-        
-        Route::put('/update-product/{productId}', [ProductController::class, 'updateProduct'])
-            ->name('update_product');
-        
-        Route::delete('/delete-product/{productId}', [ProductController::class, 'deleteProduct'])
-            ->name('delete_product');
+    Route::prefix('developer')->name('developer.')->middleware('role:developer')->group(function() {
+
+    });
+
+    Route::prefix('planning')->name('planning.')->middleware('role:planning')->group(function() {
+       
+    });
+ 
+    Route::prefix('tester')->name('tester.')->middleware('role:tester')->group(function() {
+       
+    });
+
+    Route::prefix('rh')->name('RH.')->middleware('role:RH')->group(function() {
+        Route::get('/', [RHController::class, 'getUsers']);
+        Route::post('/update-user/{userId}', [RHController::class, 'updateUser']);
+        Route::post('/update-password/{userId}', [RHController::class, 'updatePassword']);
+        Route::post('/update-role', [RHController::class, 'updateRole']);
+        Route::delete('/delete-user/{userId}', [RHController::class, 'deleteUser']);
     });
 });

@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use App\Models\Task;
+use App\Models\Project;
 
 class User extends Authenticatable
 {
@@ -20,8 +22,10 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'name',
+        'last_name',
         'email',
         'password',
+        'role',
     ];
 
     /**
@@ -42,8 +46,19 @@ class User extends Authenticatable
     protected function casts(): array
     {
         return [
-            'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function tasks()
+	{
+		return $this->belongsToMany(Task::class, 'task_user')
+            ->withPivot('user_id', 'id');
+	}
+
+    public function projects()
+    {
+        return $this->belongsToMany(User::class, 'project_user')
+            ->withPivot('user_id', 'id');
     }
 }
