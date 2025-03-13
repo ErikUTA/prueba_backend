@@ -26,6 +26,36 @@ class UserController extends Controller
         }
     }
 
+    public function getUserById($userId)
+    {
+        try {
+            $user = User::with('tasks')->whereId($userId)->first();
+            return response()->json([
+                'user' => $user,
+            ], 200);
+        } catch(\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function getUsersToPlanning()
+    {
+        try {
+            $users = User::select('id', 'name')->with('tasks')->get();
+            return response()->json([
+                'users' => $users,
+            ], 200);
+        } catch(\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
     public function updateUser(Request $request, $userId)
     {
         \DB::beginTransaction();
