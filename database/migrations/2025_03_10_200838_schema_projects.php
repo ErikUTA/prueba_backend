@@ -71,6 +71,7 @@ return new class extends Migration
     {
         Schema::dropIfExists('users');
         Schema::dropIfExists('projects');
+        Schema::dropIfExists('cache');
         Schema::dropIfExists('tasks');
         Schema::dropIfExists('task_user');
         Schema::dropIfExists('project_user');

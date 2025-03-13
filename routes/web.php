@@ -27,6 +27,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::middleware('role:planning')->group(function() {
         Route::get('/get-users-planning', [UserController::class, 'getUsersToPlanning']);
+        Route::post('/assign-task/{userId}', [UserController::class, 'assignTaskToUser']);
         Route::post('/create-task', [TaskController::class, 'createTask']);
         Route::put('/update-task/{projectId}', [TaskController::class, 'updateTask']);
         Route::delete('/delete-task/{projectId}', [TaskController::class, 'deleteTask']);
