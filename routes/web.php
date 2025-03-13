@@ -19,7 +19,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/update-user/{userId}', [UserController::class, 'updateUser']);
     
     Route::middleware('role:developer,tester,planning')->group(function() {
-        Route::get('/get-user-task', [UserController::class, 'getUserById']);
+        Route::get('/get-user-task/{userId}', [UserController::class, 'getUserById']);
         Route::get('/get-projects', [ProjectController::class, 'getProjects']);
         Route::get('/get-tasks', [TaskController::class, 'getTasks']);
         Route::put('/update-status/{taskId}', [TaskController::class, 'updateStatus']);
