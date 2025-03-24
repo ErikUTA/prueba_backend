@@ -18,7 +18,7 @@ class TaskSeeder extends Seeder
             'id' => 1,
             'title' => 'Tarea de prueba',
             'description' => 'Tarea de prueba',
-            'status' => 9,
+            'status' => 5,
             'project_id' => 1,
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now()

@@ -12,8 +12,10 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        $this->call(RoleSeeder::class);
         $this->call(UserSeeder::class);
-        $this->call(StatusSeeder::class);
+        $this->call(TaskStatusSeeder::class);
+        $this->call(ProjectStatusSeeder::class);
         $this->call(ProjectSeeder::class);
         $this->call(TaskSeeder::class);
     }
