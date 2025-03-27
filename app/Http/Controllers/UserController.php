@@ -67,23 +67,29 @@ class UserController extends Controller
                     'message' => 'Usuario no encontrado'
                 ], 500);
             }
-            $validator = $request->validate([
+            $data = [
+                'name', 
+                'last_name', 
+                'second_last_name', 
+                'password', 
+                'role'
+            ];
+            $rules = [
                 'name' => 'required|string|max:255',
                 'last_name' => 'required|string|max:255',
+                'second_last_name' => 'required|string|max:255',
                 'password' => 'required|string|min:8',
                 'role' => 'required|string',
-            ]);
+            ];
             if(auth()->user()->role === 'RH') {
-                $validator = $request->validate([
-                    'name' => 'required|string|max:255',
-                    'last_name' => 'required|string|max:255',
-                    'email' => 'required|string|email|max:255|unique:users',
-                    'password' => 'required|string|min:8',
-                    'role' => 'required|string',
-                ]);
+                array_push($data, 'email');
+                $rules['email'] = 'required|string|email|max:255|unique:users';
             }
-            $user->fill($request->all());
-            $user->update($validator);
+            $request->only($data);
+            $validated = $request->validate($rules);
+
+            $user->fill($validated);
+            $user->update($validated);
             
             \DB::commit();
             return response()->json([
@@ -261,7 +267,13 @@ class UserController extends Controller
         $credentials = $request->only('email', 'password');
 
         if (Auth::attempt($credentials)) {
-            return response()->json(['message' => 'Login completado']);
+            $user = Auth::user();
+            $token = $user->createToken('auth-token')->plainTextToken;
+
+            return response()->json([
+                'success' => true,
+                'token' => $token
+            ]);
         }
 
         return response()->json(['message' => 'Credenciales incorrectas'], 401);
@@ -269,7 +281,10 @@ class UserController extends Controller
 
     public function logout(Request $request)
     {
-        Auth::logout();
+        $request->user()->tokens->each(function ($token) {
+            $token->delete();
+        });
+    
         return response()->json(['message' => 'Logout completado']);
     }
 

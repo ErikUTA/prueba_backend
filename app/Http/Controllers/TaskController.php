@@ -31,7 +31,6 @@ class TaskController extends Controller
             $validator = $request->validate([
                 'title' => 'required|string|max:255',
                 'description' => 'required',
-                'status' => 'required|exists:status,id',
                 'project_id' => 'required|exists:projects,id'
             ]);
             $users = $request->users;
@@ -73,15 +72,12 @@ class TaskController extends Controller
                 'project_id' => 'required|exists:projects,id'
             ]);
             if(auth()->user()->role === 'RH') {
+                $request->only(['title', 'description', 'project_id']);
                 $validator = $request->validate([
                     'title' => 'required|string|max:255',
                     'description' => 'required',
                     'project_id' => 'required|exists:projects,id'
                 ]);
-            }
-            $users = $request->users;
-            if(!empty($users)) {
-                $task->users()->sync($users);
             }
             
             $task->update($validator);
@@ -150,6 +146,34 @@ class TaskController extends Controller
             ], 200);
         } catch(\Exception $e) {
             \DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function assignUsersToTask(Request $request, $taskId) {
+        \DB::beginTransaction();
+        try {
+            $task = Task::find($taskId);
+            $users = $request->users;
+            
+            if(!$user) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Tarea no encontrada'
+                ], 500);
+            }
+            $task->users()->sync($users);
+
+            \DB::commit();
+            return response()->json([
+                'success' => true,
+                'message' => 'Se han asignado los usuarios correctamente',
+            ], 200);
+        } catch(\Exception $e) {
+            \DB::rollBack(); 
             return response()->json([
                 'success' => false,
                 'message' => $e->getMessage()
