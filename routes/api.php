@@ -14,38 +14,38 @@ Route::prefix('auth')->group(function () {
     });
 });
 
-Route::middleware('auth:sanctum')->group(function () {
+Route::prefix('api')->middleware('auth:sanctum')->group(function () {
     Route::put('/update-user/{userId}', [UserController::class, 'updateUser']);
     
-    Route::middleware('role:developer,tester,planning')->group(function() {
-        Route::prefix('users')->group(function () {
+    Route::middleware('role:1,2,3')->group(function() {
+        Route::controller(UserController::class)->group(function () {
             Route::get('/get-user-task/{userId}', [UserController::class, 'getUserById']);
         });
 
-        Route::prefix('projects')->group(function () {
+        Route::controller(ProjectController::class)->group(function() {
             Route::get('/get-projects', [ProjectController::class, 'getProjects']);
         });
 
-        Route::prefix('tasks')->group(function () {
+        Route::controller(TaskController::class)->group(function() {
             Route::get('/get-tasks', [TaskController::class, 'getTasks']);
             Route::put('/update-status/{taskId}', [TaskController::class, 'updateStatus']);
         });
     }); 
 
-    Route::middleware('role:planning')->group(function() {
-        Route::prefix('users')->group(function () {
+    Route::middleware('role:2')->group(function() {
+        Route::controller(UserController::class)->group(function () {
             Route::get('/get-users-planning', [UserController::class, 'getUsersToPlanning']);
             Route::post('/assign-task/{userId}', [UserController::class, 'assignTaskToUser']);
         });
 
-        Route::prefix('tasks')->group(function () {
+        Route::controller(TaskController::class)->group(function () {
             Route::post('/create-task', [TaskController::class, 'createTask']);
             Route::put('/update-task/{taskId}', [TaskController::class, 'updateTask']);
             Route::put('/assign-users-task/{taskId}', [TaskController::class, 'assignUsersToTask']);
             Route::delete('/delete-task/{taskId}', [TaskController::class, 'deleteTask']);
         });
 
-        Route::prefix('projects')->group(function () {
+        Route::controller(ProjectController::class)->group(function () {
             Route::post('/create-project', [ProjectController::class, 'createProject']);
             Route::put('/update-project/{projectId}', [ProjectController::class, 'updateProject']);
             Route::post('/assign-users-project/{projectId}', [ProjectController::class, 'assignUserToProject']);
@@ -53,8 +53,8 @@ Route::middleware('auth:sanctum')->group(function () {
         });
     });
 
-    Route::middleware('role:RH')->group(function() {
-        Route::prefix('users')->group(function () {
+    Route::middleware('role:4')->group(function() {
+        Route::controller(UserController::class)->group(function () {
             Route::get('/get-users', [UserController::class, 'getUsers']);
             Route::post('/register', [UserController::class, 'register']);
             Route::put('/update-password/{userId}', [UserController::class, 'updatePassword']);

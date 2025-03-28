@@ -17,10 +17,10 @@ class CheckRole
     public function handle(Request $request, Closure $next, ...$roles): Response
     {
         $user = auth()->user()->role;
-        $roleNames = Role::whereIn('name', $roles)->get();
-        $roleIds = $roleNames->pluck('id')->toArray();
+        // $roleNames = Role::whereIn('name', $roles)->get();
+        // $roleIds = $roleNames->pluck('id')->toArray();
 
-        if (!in_array($user, $roleIds)) {
+        if (!in_array($user, $roles)) {
             return response()->json(['message' => 'Ruta restringida para este rol'], 403);
         }
         return $next($request);
