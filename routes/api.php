@@ -1,102 +1,103 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use \App\Http\Controllers\ProjectController;
-use \App\Http\Controllers\TaskController;
-use \App\Http\Controllers\UserController;
+use App\Http\Controllers\Api\ProjectController;
+use App\Http\Controllers\Api\TaskController;
+use App\Http\Controllers\Api\UserController;
 use Illuminate\Support\Facades\Auth;
 
-
-
 Route::post('login', [UserController::class, 'login'])
-    ->name('web.login');
-
+    ->name('api.login');
 Route::post('logout', [UserController::class, 'logout'])
-    ->name('web.logout');
+    ->name('api.logout');
 
 Route::middleware('auth:sanctum')->get('user', function () {
     return Auth::user();
 });
 
-Route::namespace('Web')->middleware('auth:sanctum')->group(function () {
-    
-    Route::put('/update-user/{userId}', [UserController::class, 'updateUser'])
-        ->name('web.update_user');
-    
-    Route::middleware('role:1,2,3')->group(function() {
-        Route::controller(UserController::class)->group(function () {
+Route::middleware('auth:sanctum')->group(function () {
+
+    Route::prefix('users')->group(function() {
+        Route::put('/update/{userId}', [UserController::class, 'updateUser'])
+            ->name('api.update_user');
+
+        
+        Route::middleware('role:1,2,3')->group(function () {
             Route::get('/get-user-task/{userId}', [UserController::class, 'getUserById'])
-                ->name('web.get_user_task');
+                ->name('api.get_user_task');
+
         });
 
-        Route::controller(ProjectController::class)->group(function() {
-            Route::get('/get-projects', [ProjectController::class, 'getProjects'])
-                ->name('web.get_projects');
-        });
-
-        Route::controller(TaskController::class)->group(function() {
-            Route::get('/get-tasks', [TaskController::class, 'getTasks'])
-                ->name('web.get_tasks');
-
-            Route::put('/update-status/{taskId}', [TaskController::class, 'updateStatus'])
-                ->name('web.update_status');
-        });
-    }); 
-
-    Route::middleware('role:2')->group(function() {
-        Route::controller(UserController::class)->group(function () {
+        Route::middleware('role:2')->group(function () {
             Route::get('/get-users-planning', [UserController::class, 'getUsersToPlanning'])
-                ->name('web.get_users_planning');
+                ->name('api.get_users_planning');
 
             Route::post('/assign-task/{userId}', [UserController::class, 'assignTaskToUser'])
-                ->name('web.assign_task');
+                ->name('api.assign_task');
+
         });
 
-        Route::controller(TaskController::class)->group(function () {
-            Route::post('/create-task', [TaskController::class, 'createTask'])
-                ->name('web.create_task');
+        Route::middleware('role:4')->group(function () {
+            Route::get('/get-users', [UserController::class, 'getUsers'])
+                ->name('api.get_users');
 
-            Route::put('/update-task/{taskId}', [TaskController::class, 'updateTask'])
-                ->name('web.update_task');
+            Route::post('/register', [UserController::class, 'register'])
+                ->name('api.register');
 
-            Route::put('/assign-users-task/{taskId}', [TaskController::class, 'assignUsersToTask'])
-                ->name('web.assign_users_task');
+            Route::put('/update-password/{userId}', [UserController::class, 'updatePassword'])
+                ->name('api.update_password');
 
-            Route::delete('/delete-task/{taskId}', [TaskController::class, 'deleteTask'])
-                ->name('web.delete_task');
-        });
+            Route::put('/update-role/{userId}', [UserController::class, 'updateRole'])
+                ->name('api.update_role');
 
-        Route::controller(ProjectController::class)->group(function () {
-            Route::post('/create-project', [ProjectController::class, 'createProject'])
-                ->name('web.create_project');
-                
-            Route::put('/update-project/{projectId}', [ProjectController::class, 'updateProject'])
-                ->name('web.update_project');
-
-            Route::post('/assign-users-project/{projectId}', [ProjectController::class, 'assignUserToProject'])
-                ->name('web.assign_users_project');
-
-            Route::delete('/delete-project/{projectId}', [ProjectController::class, 'deleteProject'])
-                ->name('web.delete_project');
+            Route::delete('/delete-user/{userId}', [UserController::class, 'deleteUser'])
+                ->name('api.delete_user');
         });
     });
 
-    Route::middleware('role:4')->group(function() {
-        Route::controller(UserController::class)->group(function () {
-            Route::get('/get-users', [UserController::class, 'getUsers'])
-                ->name('web.get_users');
+    Route::prefix('projects')->group(function() {
+        Route::middleware('role:1,2,3')->group(function () {
+            Route::get('/', [ProjectController::class, 'getProjects'])
+                ->name('api.get_projects');
 
-            Route::post('/register', [UserController::class, 'register'])
-                ->name('web.register');
+        });
 
-            Route::put('/update-password/{userId}', [UserController::class, 'updatePassword'])
-                ->name('web.update_password');
+        Route::middleware('role:2')->group(function () {
+            Route::post('/create', [ProjectController::class, 'createProject'])
+                ->name('api.create_project');
 
-            Route::put('/update-role/{userId}', [UserController::class, 'updateRole'])
-                ->name('web.update_role');
+            Route::put('/update/{projectId}', [ProjectController::class, 'updateProject'])
+                ->name('api.update_project');
 
-            Route::delete('/delete-user/{userId}', [UserController::class, 'deleteUser'])
-                ->name('web.delete_user');
+            Route::post('/assign-users/{projectId}', [ProjectController::class, 'assignUserToProject'])
+                ->name('api.assign_users_project');
+
+            Route::delete('/delete/{projectId}', [ProjectController::class, 'deleteProject'])
+                ->name('api.delete_project');
+        });
+    });
+
+    Route::prefix('tasks')->group(function() {
+        Route::middleware('role:1,2,3')->group(function () {
+            Route::get('/', [TaskController::class, 'getTasks'])
+                ->name('api.get_tasks');
+
+            Route::put('/update-status/{taskId}', [TaskController::class, 'updateStatus'])
+                ->name('api.update_status');
+        });
+
+        Route::middleware('role:2')->group(function () {
+            Route::post('/create', [TaskController::class, 'createTask'])
+                ->name('api.create_task');
+
+            Route::put('/update/{taskId}', [TaskController::class, 'updateTask'])
+                ->name('api.update_task');
+
+            Route::put('/assign-users/{taskId}', [TaskController::class, 'assignUsersToTask'])
+                ->name('api.assign_users_task');
+
+            Route::delete('/delete/{taskId}', [TaskController::class, 'deleteTask'])
+                ->name('api.delete_task');
         });
     });
 });
