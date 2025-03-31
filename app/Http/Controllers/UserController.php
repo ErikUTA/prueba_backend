@@ -78,12 +78,13 @@ class UserController extends Controller
                 'name' => 'required|string|max:255',
                 'last_name' => 'required|string|max:255',
                 'second_last_name' => 'required|string|max:255',
-                'password' => 'required|string|min:8',
                 'role' => 'required|string',
             ];
             if(auth()->user()->role === 'RH') {
                 array_push($data, 'email');
+                array_push($data, 'password');
                 $rules['email'] = 'required|string|email|max:255|unique:users';
+                $rules['password'] = 'required|string|min:8';
             }
             $request->only($data);
             $validated = $request->validate($rules);

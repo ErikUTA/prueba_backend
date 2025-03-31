@@ -20,12 +20,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('users')->group(function() {
         Route::put('/update/{userId}', [UserController::class, 'updateUser'])
             ->name('api.update_user');
-
         
         Route::middleware('role:1,2,3')->group(function () {
             Route::get('/get-user-task/{userId}', [UserController::class, 'getUserById'])
                 ->name('api.get_user_task');
-
         });
 
         Route::middleware('role:2')->group(function () {
