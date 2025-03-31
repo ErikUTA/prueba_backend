@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Models\Role;
 use App\Services\PayUService\Exception;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
@@ -88,7 +89,7 @@ class UserController extends Controller
                 'second_last_name' => 'required|string|max:255',
                 'role' => 'required|string',
             ];
-            if(auth()->user()->role === 'RH') {
+            if(auth()->user()->role === Role::RH) {
                 array_push($data, 'email', 'password');
                 $rules['email'] = 'required|string|email|max:255|unique:users';
                 $rules['password'] = 'required|string|min:8';
