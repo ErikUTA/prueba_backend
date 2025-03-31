@@ -68,7 +68,7 @@ class TaskController extends Controller
             $validator = $request->validate([
                 'title' => 'required|string|max:255',
                 'description' => 'required',
-                'status' => 'required|exists:status,id',
+                'status' => 'required|exists:task_status,id',
                 'project_id' => 'required|exists:projects,id'
             ]);
             if(auth()->user()->role === 'RH') {
@@ -108,7 +108,7 @@ class TaskController extends Controller
                 ], 500);
             }
             $validator = $request->validate([
-                'status' => 'required|exists:status,id',
+                'status' => 'required|exists:task_status,id',
             ]);
             $task->update($validator);
 

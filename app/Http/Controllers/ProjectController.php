@@ -32,8 +32,7 @@ class ProjectController extends Controller
             $validator = $request->validate([
                 'name' => 'required|string|max:255',
                 'description' => 'required',
-                'status' => 'required|exists:status,id',
-                'user_id' => 'required|exists:users,id'
+                'status' => 'required|exists:project_status,id',
             ]);
             $project = Project::create($validator);
 
@@ -65,7 +64,7 @@ class ProjectController extends Controller
             $validator = $request->validate([
                 'name' => 'required|string|max:255',
                 'description' => 'required',
-                'status' => 'required|exists:status,id'
+                'status' => 'required|exists:project_status,id'
             ]);
             
             $project->update($validator);
