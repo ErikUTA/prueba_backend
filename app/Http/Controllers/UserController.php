@@ -89,8 +89,7 @@ class UserController extends Controller
                 'role' => 'required|string',
             ];
             if(auth()->user()->role === 'RH') {
-                array_push($data, 'email');
-                array_push($data, 'password');
+                array_push($data, 'email', 'password');
                 $rules['email'] = 'required|string|email|max:255|unique:users';
                 $rules['password'] = 'required|string|min:8';
             }
