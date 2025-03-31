@@ -32,6 +32,8 @@ class TaskController extends Controller
                 'title' => 'required|string|max:255',
                 'description' => 'required',
                 'project_id' => 'required|exists:projects,id'
+            ], [
+                'required' => 'Todos los campos son requeridos'
             ]);
             $users = $request->users;
 

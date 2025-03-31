@@ -95,7 +95,9 @@ class UserController extends Controller
                 $rules['password'] = 'required|string|min:8';
             }
             $request->only($data);
-            $validated = $request->validate($rules);
+            $validated = $request->validate($rules, [
+                'required' => 'Todos los campos son requeridos'
+            ]);
 
             $user->fill($validated);
             $user->update($validated);
