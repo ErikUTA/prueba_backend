@@ -15,7 +15,7 @@ class UserController extends Controller
     {
         try {
             $users = User::with('tasks')
-                ->where('active', 1)
+                ->where('active', true)
                 ->get();
             return response()->json([
                 'users' => $users,
@@ -31,7 +31,10 @@ class UserController extends Controller
     public function getUserById($userId)
     {
         try {
-            $user = User::with('tasks')->whereId($userId)->first();
+            $user = User::with('tasks')
+                ->whereId($userId)
+                ->where('active', true)
+                ->first();
             return response()->json([
                 'user' => $user,
             ], 200);
@@ -46,7 +49,10 @@ class UserController extends Controller
     public function getUsersToPlanning()
     {
         try {
-            $users = User::select('id', 'name')->with('tasks')->get();
+            $users = User::select('id', 'name')
+                ->with('tasks')
+                ->where('active', true)
+                ->get();
             return response()->json([
                 'users' => $users,
             ], 200);
