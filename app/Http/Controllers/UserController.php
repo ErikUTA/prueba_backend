@@ -14,7 +14,9 @@ class UserController extends Controller
     public function getUsers()
     {
         try {
-            $users = User::with('tasks')->get();
+            $users = User::with('tasks')
+                ->where('active', 1)
+                ->get();
             return response()->json([
                 'users' => $users,
             ], 200);
@@ -182,7 +184,9 @@ class UserController extends Controller
                     'message' => 'Usuario no encontrado'
                 ], 500);
             }
-            $user->delete();
+            $user->update([
+                'active' => 0
+            ]);
 
             \DB::commit();
             return response()->json([

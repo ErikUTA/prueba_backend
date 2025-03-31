@@ -48,7 +48,7 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::put('/update-role/{userId}', [UserController::class, 'updateRole'])
                 ->name('api.update_role');
 
-            Route::delete('/delete-user/{userId}', [UserController::class, 'deleteUser'])
+            Route::put('/delete-user/{userId}', [UserController::class, 'deleteUser'])
                 ->name('api.delete_user');
         });
     });
