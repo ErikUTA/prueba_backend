@@ -33,9 +33,11 @@ class ProjectController extends Controller
                 'name' => 'required|string|max:255',
                 'description' => 'required',
                 'status' => 'required|exists:project_status,id',
+            ], [
+                'required' => 'Todos los campos son requeridos'
             ]);
             $project = Project::create($validator);
-
+ 
             \DB::commit();
             return response()->json([
                 'success' => true,
