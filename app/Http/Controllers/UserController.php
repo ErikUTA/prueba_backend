@@ -249,6 +249,8 @@ class UserController extends Controller
                 'email' => 'required|string|email|max:255|unique:users',
                 'password' => 'required|string|min:8',
                 'role' => 'required|string',
+            ], [
+                'required' => 'Todos los campos son requeridos'
             ]);
     
             $user = User::create([
