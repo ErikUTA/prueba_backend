@@ -159,14 +159,14 @@ class TaskController extends Controller
             $task = Task::find($taskId);
             $users = $request->users;
             
-            if(!$user) {
+            if(!$task) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Tarea no encontrada'
                 ], 500);
             }
             $task->users()->sync($users);
-
+ 
             \DB::commit();
             return response()->json([
                 'success' => true,
