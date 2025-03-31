@@ -191,7 +191,7 @@ class UserController extends Controller
                 ], 500);
             }
             $user->update([
-                'active' => 0
+                'active' => false
             ]);
 
             \DB::commit();
