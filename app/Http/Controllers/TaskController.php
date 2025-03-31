@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Task;
+use App\Models\Role;
 use App\Services\PayUService\Exception;
 
 class TaskController extends Controller
@@ -72,13 +73,17 @@ class TaskController extends Controller
                 'description' => 'required',
                 'status' => 'required|exists:task_status,id',
                 'project_id' => 'required|exists:projects,id'
+            ], [
+                'required' => 'Todos los campos son requeridos'
             ]);
-            if(auth()->user()->role === 'RH') {
+            if(auth()->user()->role === Role::RH) {
                 $request->only(['title', 'description', 'project_id']);
                 $validator = $request->validate([
                     'title' => 'required|string|max:255',
                     'description' => 'required',
                     'project_id' => 'required|exists:projects,id'
+                ], [
+                    'required' => 'Todos los campos son requeridos'
                 ]);
             }
             
